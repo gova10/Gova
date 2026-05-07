@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🎲 لعبة الرقم السري | تحدي الذكاء</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+            font-family: 'Segoe UI', 'Tajawal', system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* كارد اللعبة الرئيسي */
+        .game-container {
+            max-width: 550px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(8px);
+            border-radius: 64px;
+            padding: 25px 20px 35px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        /* الهيدر والشارة */
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, #FDE68A, #F97316);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .badge {
+            background: #334155;
+            display: inline-block;
+            padding: 6px 18px;
+            border-radius: 60px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #CBD5E1;
+            margin-top: 12px;
+            backdrop-filter: blur(4px);
+            box-shadow: inset 0 1px 1px rgba(0,0,0,0.2), 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* منطقة الرقم السري المخفي */
+        .secret-area {
+            background: #0f172a;
+            border-radius: 40px;
+            padding: 25px 15px;
+            text-align: center;
+            margin: 15px 0 20px;
+            border: 1px solid #F9731633;
+            box-shadow: inset 0 0 12px #00000033, 0 10px 20px -5px black;
+        }
+
+        .secret-label {
+            color: #94A3B8;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .secret-number {
+            font-size: 3.6rem;
+            font-weight: 800;
+            font-family: monospace;
+            background: #1E293B;
+            display: inline-block;
+            padding: 10px 38px;
+            border-radius: 60px;
+            color: #FACC15;
+            text-shadow: 0 0 6px #ffaa33;
+            letter-spacing: 6px;
+            box-shadow: inset 0 2px 5px #00000055, 0 5px 10px rgba(0,0,0,0.3);
+        }
+
+        /* لوحة التحكم */
+        .control-panel {
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 48px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .guess-input-area {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        input {
+            flex: 2;
+            min-width: 140px;
+            background: #0F172A;
+            border: 2px solid #334155;
+            padding: 16px 20px;
+            border-radius: 60px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            color: #FACC15;
+            font-family: monospace;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            border-color: #F97316;
+            box-shadow: 0 0 0 3px #F9731640;
+            background: #00000055;
+        }
+
+        button {
+            background: linear-gradient(95deg, #F97316, #EA580C);
+            border: none;
+            padding: 0 28px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 6px 0 #9A3412;
+        }
+
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #9A3412;
+        }
+
+        .reset-btn {
+            background: linear-gradient(95deg, #3B82F6, #2563EB);
+            box-shadow: 0 6px 0 #1E3A8A;
+            width: 100%;
+            justify-content: center;
+            padding: 14px;
+            font-size: 1.1rem;
+        }
+
+        /* الرسائل والإحصائيات */
+        .message-box {
+            background: #0F172ACC;
+            border-radius: 40px;
+            padding: 16px 20px;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            backdrop-filter: blur(4px);
+            border-right: 6px solid #F97316;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            background: #00000033;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+        }
+
+        .stat-item {
+            background: #1E293B;
+            padding: 6px 16px;
+            border-radius: 40px;
+            color: #CBD5E1;
+        }
+
+        .stat-value {
+            color: #FACC15;
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-right: 6px;
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            color: #64748B;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 480px) {
+            .game-container { padding: 18px; }
+            .secret-number { font-size: 2.5rem; padding: 5px 20px; letter-spacing: 3px; }
+            button { padding: 0 20px; font-size: 1rem; }
+            input { font-size: 1.2rem; padding: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="header">
+        <h1>
+            🎲 الرقم السري
+        </h1>
+        <div class="badge">✨ خمن الرقم بين 1 و 100 ✨</div>
+    </div>
+
+    <div class="secret-area">
+        <div class="secret-label">🔒 الرقم السري 🔒</div>
+        <div class="secret-number" id="secretDisplay">???</div>
+    </div>
+
+    <div class="control-panel">
+        <div class="guess-input-area">
+            <input type="number" id="guessInput" placeholder="أدخل رقمك" min="1" max="100">
+            <button id="guessBtn">🔍 تخمين</button>
+        </div>
+        <button id="resetBtn" class="reset-btn">🔄 لعبة جديدة</button>
+
+        <div class="message-box" id="messageBox">
+            💡 ابدأ التخمين .. حظ سعيد!
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">📊 محاولات: <span class="stat-value" id="attemptCount">0</span></div>
+            <div class="stat-item">🎯 أقل رقم: <span class="stat-value" id="lowHint">1</span></div>
+            <div class="stat-item">🏹 أعلى رقم: <span class="stat-value" id="highHint">100</span></div>
+        </div>
+    </div>
+    <footer>🎮 لعبة احترافية | تخمين الأرقام | طور تركيزك</footer>
+</div>
+
+<script>
+    // ----------------------------------------------
+    // ثوابت اللعبة وحالة اللعبة
+    // ----------------------------------------------
+    let secretNumber = null;       // الرقم السري الحقيقي
+    let attempts = 0;             // عدد المحاولات
+    let gameOver = false;          // هل انتهت اللعبة؟
+    let minRange = 1;             // أقل نطاق مسموح
+    let maxRange = 100;           // أعلى نطاق مسموح
+
+    // عناصر DOM
+    const secretDisplay = document.getElementById('secretDisplay');
+    const guessInput = document.getElementById('guessInput');
+    const guessBtn = document.getElementById('guessBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const messageBox = document.getElementById('messageBox');
+    const attemptCountSpan = document.getElementById('attemptCount');
+    const lowHintSpan = document.getElementById('lowHint');
+    const highHintSpan = document.getElementById('highHint');
+
+    // ----------------------------------------------
+    // دوال مساعدة
+    // ----------------------------------------------
+    function updateUI() {
+        // تحديث عداد المحاولات
+        attemptCountSpan.textContent = attempts;
+        // تحديث عرض النطاق الديناميكي
+        lowHintSpan.textContent = minRange;
+        highHintSpan.textContent = maxRange;
+        
+        // إذا كانت اللعبة منتهية نظهر الرقم السري، غير ذلك علامة استفهام
+        if (gameOver) {
+            secretDisplay.textContent = secretNumber;
+        } else {
+            secretDisplay.textContent = '???';
+        }
+
+        // تفعيل / تعطيل حقل الإدخال والزر حسب حالة اللعبة
+        guessInput.disabled = gameOver;
+        guessBtn.disabled = gameOver;
+        if (gameOver) {
+            guessInput.style.opacity = '0.6';
+            guessBtn.style.opacity = '0.6';
+        } else {
+            guessInput.style.opacity = '1';
+            guessBtn.style.opacity = '1';
+        }
+    }
+
+    // عرض رسالة ملونة داخل المربع (أيقونات مختلفة)
+    function setMessage(text, isError = false, isSuccess = false) {
+        messageBox.innerHTML = text;
+        if (isSuccess) {
+            messageBox.style.background = "#14532DCC";
+            messageBox.style.borderRightColor = "#4ADE80";
+            messageBox.style.color = "#DCFCE7";
+        } else if (isError) {
+            messageBox.style.background = "#7F1D1DCC";
+            messageBox.style.borderRightColor = "#EF4444";
+            messageBox.style.color = "#FECACA";
+        } else {
+            messageBox.style.background = "#0F172ACC";
+            messageBox.style.borderRightColor = "#F97316";
+            messageBox.style.color = "#F1F5F9";
+        }
+    }
+
+    // إعادة ضبط النطاق الذكي بعد كل لعبة جديدة
+    function resetRange() {
+        minRange = 1;
+        maxRange = 100;
+    }
+
+    // إنشاء رقم عشوائي جديد
+    function generateNewSecret() {
+        return Math.floor(Math.random() * 100) + 1;   // 1 - 100
+    }
+
+    // منطق التخمين الرئيسي
+    function handleGuess() {
+        if (gameOver) {
+            setMessage("🏆 اللعبة انتهت! اضغط على 'لعبة جديدة' للعب مرة أخرى.", false);
+            return;
+        }
+
+        // جلب القيمة من المدخل
+        let rawValue = guessInput.value.trim();
+        if (rawValue === "") {
+            setMessage("⚠️ من فضلك أدخل رقماً بين 1 و 100", true);
+            return;
+        }
+        
+        let guess = Number(rawValue);
+        if (isNaN(guess) || !Number.isInteger(guess) || guess < 1 || guess > 100) {
+            setMessage("❌ خطأ: يجب أن يكون الرقم صحيحاً بين 1 و 100 فقط.", true);
+            guessInput.value = "";
+            return;
+        }
+
+        // زيادة المحاولات
+        attempts++;
+        
+        // مقارنة التخمين بالرقم السري
+        if (guess === secretNumber) {
+            // فوز رائع!
+            gameOver = true;
+            setMessage(`🎉🎉 مدهش! لقد فزت في ${attempts} محاولة! الرقم السري هو ${secretNumber} 🎉🎉`, false, true);
+            updateUI();
+            return;
+        }
+        
+        // تحديث النطاق الذكي بناءً على التخمين (تلميحات ذكية)
+        if (guess < secretNumber) {
+            if (guess > minRange) minRange = guess + 1;
+            setMessage(`📈 رقم ${guess} ... صغير جداً! جرب رقماً أكبر.`, false);
+        } else { // guess > secretNumber
+            if (guess < maxRange) maxRange = guess - 1;
+            setMessage(`📉 رقم ${guess} ... كبير جداً! جرب رقماً أصغر.`, false);
+        }
+        
+        // التأكد من صحة النطاق (لا يتعارض)
+        if (minRange > maxRange) minRange = maxRange; // حماية بسيطة
+        
+        // لو كان النطاق ضيق جداً يمكن إعطاء تلميح إضافي (اختياري)
+        if (minRange === maxRange && !gameOver) {
+            setMessage(`🔥 تلميح حار: الرقم المتبقي الوحيد هو ${minRange} ! 🔥`, false);
+        }
+        
+        // تحديث واجهة النطاق والمحاولات
+        updateUI();
+        
+        // تفريغ حقل الإدخال واعطاء focus
+        guessInput.value = "";
+        guessInput.focus();
+        
+        // حالة خاصة: إذا استنفذ اللاعب المنطق (نادر)
+        if (minRange > secretNumber || maxRange < secretNumber) {
+            // خطأ منطق لا يحدث، لكن حماية
+            setMessage("⚠️ حدث خلل في النطاق! اضغط على لعبة جديدة.", true);
+        }
+    }
+
+    // إعادة ضبط كاملة للعبة
+    function resetGame() {
+        // توليد رقم سري جديد
+        secretNumber = generateNewSecret();
+        attempts = 0;
+        gameOver = false;
+        resetRange();
+        
+        // تنظيف الحقل والرسالة
+        guessInput.value = "";
+        setMessage("✨ لعبة جديدة! خمن الرقم السري (1 - 100) ✨", false);
+        
+        // تحديث الواجهة
+        updateUI();
+        
+        // إزالة أي حالات خاصة من مربع الرسائل
+        guessInput.focus();
+        
+        // للتأكد أن النطاق يظهر بشكل صحيح
+        lowHintSpan.textContent = minRange;
+        highHintSpan.textContent = maxRange;
+        
+        // إعادة تعيين لون الرسالة للوضع العادي
+        messageBox.style.background = "#0F172ACC";
+        messageBox.style.borderRightColor = "#F97316";
+    }
+
+    // ----------------------------------------------
+    // ربط الأحداث
+    // ----------------------------------------------
+    function init() {
+        resetGame();  // يولد الرقم ويضبط الحالة
+        
+        guessBtn.addEventListener('click', () => {
+            handleGuess();
+        });
+        
+        resetBtn.addEventListener('click', () => {
+            resetGame();
+        });
+        
+        // خاصية الضغط على Enter في حقل الإدخال
+        guessInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                if (!gameOver) handleGuess();
+            }
+        });
+        
+        // منع كتابة أحرف غير رقمية (تحسين)
+        guessInput.addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            let val = parseInt(this.value);
+            if (val > 100) this.value = 100;
+            if (val < 1 && this.value.length > 0) this.value = 1;
+        });
+    }
+
+    // بدء تشغيل اللعبة
+    init();
+</script>
+</body>
+</html>
